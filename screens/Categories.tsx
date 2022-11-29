@@ -6,11 +6,13 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { ColorPicker, fromHsv } from 'react-native-color-picker';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
 
 import { theme } from '../theme';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
 import { Category } from '../types/category';
 import { CategoryRow } from '../components/CategoryRow';
 
@@ -66,7 +68,36 @@ export const Categories = () => {
           }}
         >
           {categories.map(({ id, color, name }) => (
-            <CategoryRow key={id} color={color} name={name} />
+            <Swipeable
+              key={id}
+              renderRightActions={() => {
+                return (
+                  <View
+                    style={{
+                      backgroundColor: theme.colors.error,
+                      width: 75,
+                    }}
+                  >
+                    <RectButton
+                      style={{
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      onPress={() =>
+                        setCategories(
+                          categories.filter((category) => category.id !== id)
+                        )
+                      }
+                    >
+                      <EvilIcons name='trash' size={40} color='white' />
+                    </RectButton>
+                  </View>
+                );
+              }}
+            >
+              <CategoryRow color={color} name={name} />
+            </Swipeable>
           ))}
         </View>
         <View style={{ flex: 1 }} />
