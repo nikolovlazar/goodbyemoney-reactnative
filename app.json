@@ -1,11 +1,13 @@
 {
   "expo": {
+    "jsEngine": "hermes",
     "name": "GoodbyeMoney",
     "slug": "GoodbyeMoney",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "colorScheme": "dark",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
