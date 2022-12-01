@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, Alert } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
 
 import { ListItem } from '../components/ListItem';
@@ -28,7 +28,31 @@ export const Settings = ({ navigation }) => {
           navigation.navigate('Categories');
         }}
       />
-      <ListItem label='Erase all data' isDestructive onClick={() => {}} />
+      <ListItem
+        isDestructive
+        label='Erase all data'
+        onClick={() => {
+          Alert.alert(
+            'Are you sure?',
+            'This action cannot be undone',
+            [
+              {
+                text: 'Cancel',
+                onPress: () => {},
+                style: 'cancel',
+              },
+              {
+                text: 'Erase data',
+                style: 'destructive',
+                onPress: () => console.log('Erase data Pressed'),
+              },
+            ],
+            {
+              userInterfaceStyle: 'dark',
+            }
+          );
+        }}
+      />
     </View>
   );
 };

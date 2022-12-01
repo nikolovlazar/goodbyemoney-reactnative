@@ -3,6 +3,7 @@ import {
   Button,
   KeyboardAvoidingView,
   Modal,
+  ScrollView,
   TextInput,
   View,
 } from 'react-native';
@@ -61,46 +62,47 @@ export const Categories = () => {
         keyboardVerticalOffset={112}
         style={{ margin: 16, flex: 1 }}
       >
-        <View
-          style={{
-            borderRadius: 11,
-            overflow: 'hidden',
-          }}
-        >
-          {categories.map(({ id, color, name }) => (
-            <Swipeable
-              key={id}
-              renderRightActions={() => {
-                return (
-                  <View
-                    style={{
-                      backgroundColor: theme.colors.error,
-                      width: 75,
-                    }}
-                  >
-                    <RectButton
+        <ScrollView style={{ flex: 1 }}>
+          <View
+            style={{
+              borderRadius: 11,
+              overflow: 'hidden',
+            }}
+          >
+            {categories.map(({ id, color, name }) => (
+              <Swipeable
+                key={id}
+                renderRightActions={() => {
+                  return (
+                    <View
                       style={{
-                        flex: 1,
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        backgroundColor: theme.colors.error,
+                        width: 75,
                       }}
-                      onPress={() =>
-                        setCategories(
-                          categories.filter((category) => category.id !== id)
-                        )
-                      }
                     >
-                      <EvilIcons name='trash' size={40} color='white' />
-                    </RectButton>
-                  </View>
-                );
-              }}
-            >
-              <CategoryRow color={color} name={name} />
-            </Swipeable>
-          ))}
-        </View>
-        <View style={{ flex: 1 }} />
+                      <RectButton
+                        style={{
+                          flex: 1,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                        onPress={() =>
+                          setCategories(
+                            categories.filter((category) => category.id !== id)
+                          )
+                        }
+                      >
+                        <EvilIcons name='trash' size={40} color='white' />
+                      </RectButton>
+                    </View>
+                  );
+                }}
+              >
+                <CategoryRow color={color} name={name} />
+              </Swipeable>
+            ))}
+          </View>
+        </ScrollView>
         <View
           style={{
             display: 'flex',
