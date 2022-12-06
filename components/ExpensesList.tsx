@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { theme } from '../theme';
 
 import { ExpensesGroup } from '../types/expenses-group';
@@ -16,8 +16,59 @@ export const ExpensesList = ({ groups }: Props) => (
       flexDirection: 'column',
       overflow: 'scroll',
       paddingHorizontal: 16,
+      width: '100%',
+      paddingTop: 16,
     }}
   >
+    <View
+      style={{
+        display: 'flex',
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 16,
+      }}
+    >
+      <Text style={{ color: theme.colors.textPrimary, fontSize: 17 }}>
+        Total for:
+      </Text>
+      <TouchableOpacity style={{ marginLeft: 16 }}>
+        <Text style={{ color: theme.colors.primary, fontSize: 17 }}>
+          This week
+        </Text>
+      </TouchableOpacity>
+    </View>
+    <View
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        width: '100%',
+        marginBottom: 16,
+      }}
+    >
+      <Text
+        style={{
+          color: theme.colors.textSecondary,
+          fontSize: 17,
+          marginTop: 2,
+        }}
+      >
+        $
+      </Text>
+      <Text
+        style={{
+          color: theme.colors.textPrimary,
+          fontSize: 40,
+          fontWeight: '600',
+          marginLeft: 2,
+        }}
+      >
+        195
+      </Text>
+    </View>
     {groups.map(({ day, expenses, total }) => (
       <View
         key={day}
