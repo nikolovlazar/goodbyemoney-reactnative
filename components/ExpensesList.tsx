@@ -88,7 +88,7 @@ export const ExpensesList = ({ groups }: Props) => (
           style={{
             borderBottomColor: theme.colors.border,
             borderBottomWidth: 2,
-            marginBottom: 12,
+            marginBottom: 8,
           }}
         />
         {expenses.map((expense) => (
@@ -96,8 +96,8 @@ export const ExpensesList = ({ groups }: Props) => (
         ))}
         <View
           style={{
-            borderBottomColor: 'black',
-            borderBottomWidth: 1,
+            borderBottomColor: theme.colors.border,
+            borderBottomWidth: 2,
             marginBottom: 4,
           }}
         />
