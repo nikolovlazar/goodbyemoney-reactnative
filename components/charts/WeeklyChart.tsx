@@ -87,8 +87,6 @@ export const WeeklyChart = ({ expenses }: Props) => {
   const yRange = [0, graphHeight];
   const y = d3.scaleLinear().domain(yDomain).range(yRange);
 
-  console.log(JSON.stringify(groupedExpenses, null, 2));
-
   return (
     <Svg width={SVGWidth} height={SVGHeight}>
       <G y={graphHeight}>
