@@ -7,6 +7,7 @@ import { theme } from '../theme';
 import { Recurrence } from '../types/recurrence';
 import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { WeeklyChart } from '../components/charts/WeeklyChart';
+import { YearlyChart } from '../components/charts/YearlyChart';
 
 type Props = {
   reportsSheetRef: MutableRefObject<BottomSheetMethods>;
@@ -14,7 +15,7 @@ type Props = {
 
 export const Reports = ({ reportsSheetRef }: Props) => {
   const [recurrence, setRecurrence] = React.useState<Recurrence>(
-    Recurrence.Weekly
+    Recurrence.Yearly
   );
 
   const selectRecurrence = (selectedRecurrence: Recurrence) => {
@@ -148,6 +149,84 @@ export const Reports = ({ reportsSheetRef }: Props) => {
                     color: '#FF6D00',
                   },
                   date: new Date('2021-09-14T00:00:00.000Z'),
+                  note: 'Bought some transport',
+                  recurrence: Recurrence.None,
+                },
+              ]}
+            />
+          )}
+          {recurrence === Recurrence.Yearly && (
+            <YearlyChart
+              expenses={[
+                {
+                  id: '1',
+                  amount: 100,
+                  category: {
+                    id: '1',
+                    name: 'Food',
+                    color: '#FFD600',
+                  },
+                  date: new Date('2021-09-12T00:00:00.000Z'),
+                  note: 'Bought some food',
+                  recurrence: Recurrence.None,
+                },
+                {
+                  id: '2',
+                  amount: 200,
+                  category: {
+                    id: '2',
+                    name: 'Transport',
+                    color: '#FF6D00',
+                  },
+                  date: new Date('2021-09-12T00:00:00.000Z'),
+                  note: 'Bought some transport',
+                  recurrence: Recurrence.None,
+                },
+                {
+                  id: '3',
+                  amount: 100,
+                  category: {
+                    id: '1',
+                    name: 'Food',
+                    color: '#FFD600',
+                  },
+                  date: new Date('2021-09-13T00:00:00.000Z'),
+                  note: 'Bought some food',
+                  recurrence: Recurrence.None,
+                },
+                {
+                  id: '4',
+                  amount: 200,
+                  category: {
+                    id: '2',
+                    name: 'Transport',
+                    color: '#FF6D00',
+                  },
+                  date: new Date('2021-09-14T00:00:00.000Z'),
+                  note: 'Bought some transport',
+                  recurrence: Recurrence.None,
+                },
+                {
+                  id: '5',
+                  amount: 200,
+                  category: {
+                    id: '2',
+                    name: 'Transport',
+                    color: '#FF6D00',
+                  },
+                  date: new Date('2021-10-14T00:00:00.000Z'),
+                  note: 'Bought some transport',
+                  recurrence: Recurrence.None,
+                },
+                {
+                  id: '6',
+                  amount: 50,
+                  category: {
+                    id: '2',
+                    name: 'Transport',
+                    color: '#FF6D00',
+                  },
+                  date: new Date('2021-10-14T00:00:00.000Z'),
                   note: 'Bought some transport',
                   recurrence: Recurrence.None,
                 },
