@@ -179,12 +179,12 @@ export const Add = () => {
               >
                 <Text
                   style={{
-                    color: category.color,
+                    color: category?.color,
                     textTransform: 'capitalize',
                     fontSize: 16,
                   }}
                 >
-                  {category.name}
+                  {category?.name}
                 </Text>
               </TouchableOpacity>
             }

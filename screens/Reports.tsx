@@ -13,7 +13,12 @@ import { MonthlyChart } from '../components/charts/MonthlyChart';
 import { LazyViewPager } from '../components/LazyPagerView';
 import { calculateRange, formatDateRange } from '../utils/date';
 import { Expense } from '../models/expense';
-import { filterExpensesInPeriod, groupExpensesByDay } from '../utils/expenses';
+import {
+  filterExpensesInPeriod,
+  getAverageAmountInPeriod,
+  groupExpensesByDay,
+} from '../utils/expenses';
+import { shortenNumber } from '../utils/number';
 
 const { useQuery } = RealmContext;
 
@@ -61,11 +66,9 @@ export const Reports = ({ reportsSheetRef }: Props) => {
 
   const groupedExpenses = groupExpensesByDay(filteredExpenses);
 
-  const totalForPeriod = filteredExpenses.reduce(
-    (acc, expense) => acc + expense.amount,
-    0
-  );
-  const averageForPeriod = totalForPeriod / filteredExpenses.length;
+  const totalForPeriod =
+    filteredExpenses.reduce((acc, expense) => acc + expense.amount, 0) ?? 0;
+  const averageForPeriod = getAverageAmountInPeriod(totalForPeriod, recurrence);
 
   return (
     <>
@@ -119,7 +122,7 @@ export const Reports = ({ reportsSheetRef }: Props) => {
                       marginLeft: 4,
                     }}
                   >
-                    {totalForPeriod.toFixed(2)}
+                    {shortenNumber(totalForPeriod)}
                   </Text>
                 </View>
               </View>
@@ -156,25 +159,41 @@ export const Reports = ({ reportsSheetRef }: Props) => {
                       marginLeft: 4,
                     }}
                   >
-                    {averageForPeriod.toFixed(2)}
+                    {shortenNumber(averageForPeriod)}
                   </Text>
                 </View>
               </View>
             </View>
-            <View style={{ marginTop: 16 }}>
-              {recurrence === Recurrence.Weekly && (
-                <WeeklyChart expenses={filteredExpenses} />
-              )}
-              {recurrence === Recurrence.Monthly && (
-                <MonthlyChart date={start} expenses={filteredExpenses} />
-              )}
-              {recurrence === Recurrence.Yearly && (
-                <YearlyChart expenses={filteredExpenses} />
-              )}
-            </View>
-            <View style={{ marginTop: 16 }}>
-              <ExpensesList groups={groupedExpenses} />
-            </View>
+            {filteredExpenses.length > 0 ? (
+              <>
+                <View style={{ marginTop: 16 }}>
+                  {recurrence === Recurrence.Weekly && (
+                    <WeeklyChart expenses={filteredExpenses} />
+                  )}
+                  {recurrence === Recurrence.Monthly && (
+                    <MonthlyChart date={start} expenses={filteredExpenses} />
+                  )}
+                  {recurrence === Recurrence.Yearly && (
+                    <YearlyChart expenses={filteredExpenses} />
+                  )}
+                </View>
+                <View style={{ marginTop: 16 }}>
+                  <ExpensesList groups={groupedExpenses} />
+                </View>
+              </>
+            ) : (
+              <Text
+                style={{
+                  color: theme.colors.textPrimary,
+                  fontSize: 18,
+                  lineHeight: 28,
+                  marginTop: 40,
+                  textAlign: 'center',
+                }}
+              >
+                There are no expenses reported for this period.
+              </Text>
+            )}
           </View>
         )}
       />

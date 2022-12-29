@@ -63,3 +63,16 @@ export const getGroupedExpenses = (
 
   return groupExpensesByDay(filteredExpenses);
 };
+
+export const getAverageAmountInPeriod = (total: number, period: Recurrence) => {
+  switch (period) {
+    case Recurrence.Weekly:
+      return total / 7;
+    case Recurrence.Monthly:
+      return total / 30;
+    case Recurrence.Yearly:
+      return total / 365;
+    default:
+      return total;
+  }
+};

@@ -7,7 +7,7 @@ export const formatDateRange = (start: Date, end: Date, period: Recurrence) => {
     case Recurrence.Weekly:
       return format(start, 'd MMM') + ' - ' + format(end, 'd MMM');
     case Recurrence.Monthly:
-      return format(start, 'MMM');
+      return format(start, 'MMMM');
     case Recurrence.Yearly:
       return format(start, 'yyyy');
   }
@@ -28,8 +28,8 @@ export const calculateRange = (period: Recurrence, periodIndex: number) => {
       end = nextSunday(start);
       break;
     case Recurrence.Monthly:
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      start = new Date(now.getFullYear(), now.getMonth() - periodIndex, 1);
+      end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
       break;
     case Recurrence.Yearly:
       start = new Date(now.getFullYear(), 0, 1);

@@ -71,7 +71,7 @@ export const WeeklyChart = ({ expenses }: Props) => {
     });
     return acc;
   }, defaultValues);
-  averageExpense = averageExpense / expenses.length;
+  averageExpense = averageExpense / 7;
 
   const SVGHeight = 147 + 2 * GRAPH_MARGIN;
   const SVGWidth = Dimensions.get('window').width;
