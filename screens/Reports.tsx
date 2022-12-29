@@ -2,6 +2,7 @@ import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import React, { MutableRefObject, useEffect } from 'react';
 import { View, Text, TouchableHighlight } from 'react-native';
 
+import RealmContext from '../realm';
 import { ExpensesList } from '../components/ExpensesList';
 import { theme } from '../theme';
 import { Recurrence } from '../types/recurrence';
@@ -11,15 +12,22 @@ import { YearlyChart } from '../components/charts/YearlyChart';
 import { MonthlyChart } from '../components/charts/MonthlyChart';
 import { LazyViewPager } from '../components/LazyPagerView';
 import { calculateRange, formatDateRange } from '../utils/date';
+import { Expense } from '../models/expense';
+import { filterExpensesInPeriod, groupExpensesByDay } from '../utils/expenses';
+
+const { useQuery } = RealmContext;
 
 type Props = {
   reportsSheetRef: MutableRefObject<BottomSheetMethods>;
 };
 
 export const Reports = ({ reportsSheetRef }: Props) => {
+  const expenses = useQuery(Expense);
+
   const [recurrence, setRecurrence] = React.useState<Recurrence>(
     Recurrence.Weekly
   );
+
   const [numberOfPages, setNumberOfPages] = React.useState(53);
   const [page, setPage] = React.useState(0);
 
@@ -44,6 +52,20 @@ export const Reports = ({ reportsSheetRef }: Props) => {
 
   const { start, end } = calculateRange(recurrence, page);
   const periodLabel = formatDateRange(start, end, recurrence);
+
+  const filteredExpenses = filterExpensesInPeriod(
+    Array.from(expenses),
+    recurrence,
+    page
+  );
+
+  const groupedExpenses = groupExpensesByDay(filteredExpenses);
+
+  const totalForPeriod = filteredExpenses.reduce(
+    (acc, expense) => acc + expense.amount,
+    0
+  );
+  const averageForPeriod = totalForPeriod / filteredExpenses.length;
 
   return (
     <>
@@ -97,7 +119,7 @@ export const Reports = ({ reportsSheetRef }: Props) => {
                       marginLeft: 4,
                     }}
                   >
-                    85
+                    {totalForPeriod.toFixed(2)}
                   </Text>
                 </View>
               </View>
@@ -134,253 +156,24 @@ export const Reports = ({ reportsSheetRef }: Props) => {
                       marginLeft: 4,
                     }}
                   >
-                    85
+                    {averageForPeriod.toFixed(2)}
                   </Text>
                 </View>
               </View>
             </View>
             <View style={{ marginTop: 16 }}>
               {recurrence === Recurrence.Weekly && (
-                <WeeklyChart
-                  expenses={[
-                    {
-                      id: '1',
-                      amount: 100,
-                      category: {
-                        id: '1',
-                        name: 'Food',
-                        color: '#FFD600',
-                      },
-                      date: new Date('2021-09-12T00:00:00.000Z'),
-                      note: 'Bought some food',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '2',
-                      amount: 200,
-                      category: {
-                        id: '2',
-                        name: 'Transport',
-                        color: '#FF6D00',
-                      },
-                      date: new Date('2021-09-12T00:00:00.000Z'),
-                      note: 'Bought some transport',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '3',
-                      amount: 100,
-                      category: {
-                        id: '1',
-                        name: 'Food',
-                        color: '#FFD600',
-                      },
-                      date: new Date('2021-09-13T00:00:00.000Z'),
-                      note: 'Bought some food',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '4',
-                      amount: 200,
-                      category: {
-                        id: '2',
-                        name: 'Transport',
-                        color: '#FF6D00',
-                      },
-                      date: new Date('2021-09-14T00:00:00.000Z'),
-                      note: 'Bought some transport',
-                      recurrence: Recurrence.None,
-                    },
-                  ]}
-                />
+                <WeeklyChart expenses={filteredExpenses} />
               )}
               {recurrence === Recurrence.Monthly && (
-                <MonthlyChart
-                  date={new Date()}
-                  expenses={[
-                    {
-                      id: '1',
-                      amount: 100,
-                      category: {
-                        id: '1',
-                        name: 'Food',
-                        color: '#FFD600',
-                      },
-                      date: new Date('2021-09-12T00:00:00.000Z'),
-                      note: 'Bought some food',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '2',
-                      amount: 200,
-                      category: {
-                        id: '2',
-                        name: 'Transport',
-                        color: '#FF6D00',
-                      },
-                      date: new Date('2021-09-12T00:00:00.000Z'),
-                      note: 'Bought some transport',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '3',
-                      amount: 100,
-                      category: {
-                        id: '1',
-                        name: 'Food',
-                        color: '#FFD600',
-                      },
-                      date: new Date('2021-09-13T00:00:00.000Z'),
-                      note: 'Bought some food',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '4',
-                      amount: 200,
-                      category: {
-                        id: '2',
-                        name: 'Transport',
-                        color: '#FF6D00',
-                      },
-                      date: new Date('2021-09-14T00:00:00.000Z'),
-                      note: 'Bought some transport',
-                      recurrence: Recurrence.None,
-                    },
-                  ]}
-                />
+                <MonthlyChart date={start} expenses={filteredExpenses} />
               )}
               {recurrence === Recurrence.Yearly && (
-                <YearlyChart
-                  expenses={[
-                    {
-                      id: '1',
-                      amount: 100,
-                      category: {
-                        id: '1',
-                        name: 'Food',
-                        color: '#FFD600',
-                      },
-                      date: new Date('2021-09-12T00:00:00.000Z'),
-                      note: 'Bought some food',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '2',
-                      amount: 200,
-                      category: {
-                        id: '2',
-                        name: 'Transport',
-                        color: '#FF6D00',
-                      },
-                      date: new Date('2021-09-12T00:00:00.000Z'),
-                      note: 'Bought some transport',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '3',
-                      amount: 100,
-                      category: {
-                        id: '1',
-                        name: 'Food',
-                        color: '#FFD600',
-                      },
-                      date: new Date('2021-09-13T00:00:00.000Z'),
-                      note: 'Bought some food',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '4',
-                      amount: 200,
-                      category: {
-                        id: '2',
-                        name: 'Transport',
-                        color: '#FF6D00',
-                      },
-                      date: new Date('2021-09-14T00:00:00.000Z'),
-                      note: 'Bought some transport',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '5',
-                      amount: 200,
-                      category: {
-                        id: '2',
-                        name: 'Transport',
-                        color: '#FF6D00',
-                      },
-                      date: new Date('2021-10-14T00:00:00.000Z'),
-                      note: 'Bought some transport',
-                      recurrence: Recurrence.None,
-                    },
-                    {
-                      id: '6',
-                      amount: 50,
-                      category: {
-                        id: '2',
-                        name: 'Transport',
-                        color: '#FF6D00',
-                      },
-                      date: new Date('2021-10-14T00:00:00.000Z'),
-                      note: 'Bought some transport',
-                      recurrence: Recurrence.None,
-                    },
-                  ]}
-                />
+                <YearlyChart expenses={filteredExpenses} />
               )}
             </View>
             <View style={{ marginTop: 16 }}>
-              <ExpensesList
-                groups={[
-                  {
-                    day: 'Today',
-                    expenses: [
-                      {
-                        id: '1',
-                        amount: 100,
-                        category: {
-                          id: '1',
-                          name: 'Food',
-                          color: '#FFD600',
-                        },
-                        date: new Date(),
-                        note: 'Bought some food',
-                        recurrence: Recurrence.None,
-                      },
-                      {
-                        id: '2',
-                        amount: 200,
-                        category: {
-                          id: '2',
-                          name: 'Transport',
-                          color: '#FF6D00',
-                        },
-                        date: new Date(),
-                        note: 'Bought some transport',
-                        recurrence: Recurrence.None,
-                      },
-                    ],
-                    total: 300,
-                  },
-                  {
-                    day: 'Yesterday',
-                    expenses: [
-                      {
-                        id: '3',
-                        amount: 300,
-                        category: {
-                          id: '3',
-                          name: 'Entertainment',
-                          color: '#00C853',
-                        },
-                        date: new Date(),
-                        note: 'Bought some entertainment',
-                        recurrence: Recurrence.None,
-                      },
-                    ],
-                    total: 300,
-                  },
-                ]}
-              />
+              <ExpensesList groups={groupedExpenses} />
             </View>
           </View>
         )}

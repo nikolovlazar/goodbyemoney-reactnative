@@ -1,4 +1,4 @@
-import { Expense } from './expense';
+import { Expense } from '../models/expense';
 
 export type ExpensesGroup = {
   day: string;

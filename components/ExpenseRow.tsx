@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { theme } from '../theme';
 
-import { Expense } from '../types/expense';
+import { Expense } from '../models/expense';
 
 type Props = {
   expense: Expense;

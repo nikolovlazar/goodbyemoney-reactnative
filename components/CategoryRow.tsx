@@ -1,8 +1,13 @@
 import { View, Text } from 'react-native';
 import { theme } from '../theme';
-import { Category } from '../types/category';
 
-export const CategoryRow = ({ color, name }: Omit<Category, 'id'>) => (
+export const CategoryRow = ({
+  color,
+  name,
+}: {
+  color: string;
+  name: string;
+}) => (
   <View
     style={{
       display: 'flex',

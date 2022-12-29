@@ -7,32 +7,27 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { BSON } from 'realm';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { ColorPicker, fromHsv } from 'react-native-color-picker';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 
+import RealmContext from '../realm';
 import { theme } from '../theme';
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
-import { Category } from '../types/category';
 import { CategoryRow } from '../components/CategoryRow';
+import { Category } from '../models/category';
+
+const { useQuery, useRealm } = RealmContext;
 
 export const Categories = () => {
+  const realm = useRealm();
+  const categories = useQuery(Category);
+
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [selectedColor, setSelectedColor] = useState(theme.colors.primary);
   const [newName, setNewName] = useState('');
-  const [categories, setCategories] = useState<Category[]>([
-    {
-      id: '1',
-      color: theme.colors.primary,
-      name: 'Groceries',
-    },
-    {
-      id: '2',
-      color: theme.colors.card,
-      name: 'Clothes',
-    },
-  ]);
 
   const onSelectColor = (hex: string) => {
     setSelectedColor(hex);
@@ -43,16 +38,19 @@ export const Categories = () => {
       return;
     }
 
-    setCategories([
-      ...categories,
-      {
-        id: Math.random().toString(),
-        color: selectedColor,
-        name: newName,
-      },
-    ]);
+    realm.write(() => {
+      realm.create('Category', Category.generate(newName, selectedColor));
+    });
+
     setNewName('');
     setSelectedColor(theme.colors.primary);
+  };
+
+  const deleteCategory = (id: BSON.ObjectId) => {
+    realm.write(() => {
+      const category = realm.objectForPrimaryKey('Category', id);
+      realm.delete(category);
+    });
   };
 
   return (
@@ -69,9 +67,9 @@ export const Categories = () => {
               overflow: 'hidden',
             }}
           >
-            {categories.map(({ id, color, name }) => (
+            {categories.map(({ _id, color, name }) => (
               <Swipeable
-                key={id}
+                key={_id.toHexString()}
                 renderRightActions={() => {
                   return (
                     <View
@@ -86,11 +84,7 @@ export const Categories = () => {
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}
-                        onPress={() =>
-                          setCategories(
-                            categories.filter((category) => category.id !== id)
-                          )
-                        }
+                        onPress={() => deleteCategory(_id)}
                       >
                         <EvilIcons name='trash' size={40} color='white' />
                       </RectButton>

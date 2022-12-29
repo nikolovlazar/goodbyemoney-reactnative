@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 
 import { shortenNumber } from '../../utils/number';
 import { theme } from '../../theme';
-import { Expense } from '../../types/expense';
+import { Expense } from '../../models/expense';
 
 type Props = {
   expenses: Expense[];

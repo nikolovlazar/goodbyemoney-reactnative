@@ -8,44 +8,25 @@ import {
   InputAccessoryView,
   Keyboard,
   Platform,
-  Button,
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import DateTimePicker, {
-  DateTimePickerAndroid,
-} from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
+import RealmContext from '../realm';
 import { ListItem } from '../components/ListItem';
 import { Recurrence } from '../types/recurrence';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { theme } from '../theme';
-import { Category } from '../types/category';
+import { Category } from '../models/category';
+import { Expense } from '../models/expense';
 
-const CATEGORIES: Category[] = [
-  {
-    id: '1',
-    name: 'Food',
-    color: '#FFD600',
-  },
-  {
-    id: '2',
-    name: 'Transport',
-    color: '#FF6D00',
-  },
-  {
-    id: '3',
-    name: 'Entertainment',
-    color: '#00C853',
-  },
-  {
-    id: '4',
-    name: 'Shopping',
-    color: '#2962FF',
-  },
-];
+const { useQuery, useRealm } = RealmContext;
 
 export const Add = () => {
+  const realm = useRealm();
+  const categories = useQuery(Category);
+
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['25%', '50%', '90%'], []);
 
@@ -53,10 +34,10 @@ export const Add = () => {
     'recurrence'
   );
   const [amount, setAmount] = React.useState('');
-  const [recurrence, setRecurrence] = React.useState<string>(Recurrence.None);
+  const [recurrence, setRecurrence] = React.useState(Recurrence.None);
   const [date, setDate] = React.useState(new Date());
   const [note, setNote] = React.useState('');
-  const [category, setCategory] = React.useState<Category>(CATEGORIES[0]);
+  const [category, setCategory] = React.useState<Category>(categories[0]);
 
   const selectRecurrence = (selectedRecurrence: string) => {
     setRecurrence(selectedRecurrence as Recurrence);
@@ -66,6 +47,15 @@ export const Add = () => {
   const selectCategory = (selectedCategory: Category) => {
     setCategory(selectedCategory);
     sheetRef.current?.close();
+  };
+
+  const submitExpense = () => {
+    realm.write(() => {
+      realm.create(
+        'Expense',
+        Expense.generate(parseFloat(amount), recurrence, date, note, category)
+      );
+    });
   };
 
   return (
@@ -208,6 +198,7 @@ export const Add = () => {
             borderRadius: 10,
             marginTop: 32,
           }}
+          onPress={submitExpense}
         >
           <Text style={{ color: 'white', fontWeight: '600', fontSize: 17 }}>
             Submit expense
@@ -245,8 +236,8 @@ export const Add = () => {
         )}
         {sheetView === 'category' && (
           <BottomSheetFlatList
-            data={CATEGORIES}
-            keyExtractor={({ id }) => id}
+            data={categories}
+            keyExtractor={({ _id }) => _id.toHexString()}
             renderItem={({ item }) => (
               <TouchableHighlight
                 style={{ paddingHorizontal: 18, paddingVertical: 12 }}

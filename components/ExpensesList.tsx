@@ -36,7 +36,7 @@ export const ExpensesList = ({ groups }: Props) => (
           }}
         />
         {expenses.map((expense) => (
-          <ExpenseRow key={expense.id} expense={expense} />
+          <ExpenseRow key={expense._id.toHexString()} expense={expense} />
         ))}
         <View
           style={{
