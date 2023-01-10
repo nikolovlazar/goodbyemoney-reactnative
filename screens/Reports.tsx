@@ -1,24 +1,18 @@
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import React, { MutableRefObject, useEffect } from 'react';
-import { View, Text, TouchableHighlight } from 'react-native';
+import React, { MutableRefObject, useReducer, useRef } from 'react';
+import { Text, TouchableHighlight, FlatList, Dimensions } from 'react-native';
+import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 
 import RealmContext from '../realm';
-import { ExpensesList } from '../components/ExpensesList';
 import { theme } from '../theme';
 import { Recurrence } from '../types/recurrence';
-import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { WeeklyChart } from '../components/charts/WeeklyChart';
-import { YearlyChart } from '../components/charts/YearlyChart';
-import { MonthlyChart } from '../components/charts/MonthlyChart';
-import { LazyViewPager } from '../components/LazyPagerView';
-import { calculateRange, formatDateRange } from '../utils/date';
 import { Expense } from '../models/expense';
 import {
   filterExpensesInPeriod,
   getAverageAmountInPeriod,
-  groupExpensesByDay,
 } from '../utils/expenses';
-import { shortenNumber } from '../utils/number';
+import { ReportPageProps } from '../types/report-page';
+import { ReportPage } from '../components/ReportPage';
 
 const { useQuery } = RealmContext;
 
@@ -26,176 +20,100 @@ type Props = {
   reportsSheetRef: MutableRefObject<BottomSheetMethods>;
 };
 
+enum PagerReducerActionTypes {
+  SET_RECURRENCE = 'SET_RECURRENCE',
+}
+
+type PagerReducerAction = {
+  type: PagerReducerActionTypes;
+  payload: any;
+};
+
+type PagerState = {
+  recurrence: Recurrence;
+  numberOfPages: number;
+};
+
+function pagerReducer(state: PagerState, action: PagerReducerAction) {
+  switch (action.type) {
+    case PagerReducerActionTypes.SET_RECURRENCE:
+      var newNumberOfPages = 1;
+      switch (action.payload) {
+        case Recurrence.Weekly:
+          newNumberOfPages = 53;
+          break;
+        case Recurrence.Monthly:
+          newNumberOfPages = 12;
+          break;
+        case Recurrence.Yearly:
+          newNumberOfPages = 1;
+          break;
+      }
+
+      return {
+        ...state,
+        recurrence: action.payload,
+        numberOfPages: newNumberOfPages,
+        page: 0,
+      };
+    default:
+      return state;
+  }
+}
+
 export const Reports = ({ reportsSheetRef }: Props) => {
   const expenses = useQuery(Expense);
+  const listRef = useRef<FlatList>(null);
 
-  const [recurrence, setRecurrence] = React.useState<Recurrence>(
-    Recurrence.Weekly
-  );
-
-  const [numberOfPages, setNumberOfPages] = React.useState(53);
-  const [page, setPage] = React.useState(0);
+  const [state, dispatch] = useReducer(pagerReducer, {
+    recurrence: Recurrence.Weekly,
+    numberOfPages: 53,
+    page: 0,
+  });
 
   const selectRecurrence = (selectedRecurrence: Recurrence) => {
-    setRecurrence(selectedRecurrence);
+    dispatch({
+      type: PagerReducerActionTypes.SET_RECURRENCE,
+      payload: selectedRecurrence,
+    });
     reportsSheetRef.current.close();
+    listRef.current.scrollToIndex({ index: 0 });
   };
 
-  useEffect(() => {
-    switch (recurrence) {
-      case Recurrence.Weekly:
-        setNumberOfPages(53);
-        break;
-      case Recurrence.Monthly:
-        setNumberOfPages(12);
-        break;
-      case Recurrence.Yearly:
-        setNumberOfPages(1);
-        break;
-    }
-  }, [recurrence, page]);
+  const data = Array.from<number>({
+    length: state.numberOfPages,
+  }).map<ReportPageProps>((_, page) => {
+    const filteredExpenses = filterExpensesInPeriod(
+      Array.from(expenses),
+      state.recurrence,
+      page
+    );
 
-  const { start, end } = calculateRange(recurrence, page);
-  const periodLabel = formatDateRange(start, end, recurrence);
+    const total =
+      filteredExpenses.reduce((acc, expense) => acc + expense.amount, 0) ?? 0;
+    const average = getAverageAmountInPeriod(total, state.recurrence);
 
-  const filteredExpenses = filterExpensesInPeriod(
-    Array.from(expenses),
-    recurrence,
-    page
-  );
-
-  const groupedExpenses = groupExpensesByDay(filteredExpenses);
-
-  const totalForPeriod =
-    filteredExpenses.reduce((acc, expense) => acc + expense.amount, 0) ?? 0;
-  const averageForPeriod = getAverageAmountInPeriod(totalForPeriod, recurrence);
+    return {
+      page,
+      total,
+      average,
+      expenses: filteredExpenses,
+      recurrence: state.recurrence,
+    };
+  });
 
   return (
     <>
-      <LazyViewPager
-        buffer={3}
-        data={Array.from({ length: numberOfPages })}
-        initialPage={numberOfPages - 1}
-        onPageSelected={(newPage) => setPage(numberOfPages - newPage - 1)}
+      <FlatList
+        ref={listRef}
+        horizontal
+        inverted
+        decelerationRate='fast'
+        snapToAlignment='start'
+        snapToInterval={Dimensions.get('window').width}
+        data={data}
         style={{ width: '100%', height: '100%' }}
-        renderItem={() => (
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              paddingHorizontal: 16,
-              paddingTop: 16,
-            }}
-          >
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                width: '100%',
-              }}
-            >
-              <View style={{ display: 'flex', flexDirection: 'column' }}>
-                <Text style={{ color: theme.colors.textPrimary, fontSize: 20 }}>
-                  {periodLabel}
-                </Text>
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    marginTop: 8,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: theme.colors.textSecondary,
-                      fontSize: 16,
-                    }}
-                  >
-                    USD
-                  </Text>
-                  <Text
-                    style={{
-                      color: theme.colors.textPrimary,
-                      fontSize: 17,
-                      fontWeight: '600',
-                      marginLeft: 4,
-                    }}
-                  >
-                    {shortenNumber(totalForPeriod)}
-                  </Text>
-                </View>
-              </View>
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-end',
-                }}
-              >
-                <Text style={{ color: theme.colors.textPrimary, fontSize: 20 }}>
-                  Avg/Day
-                </Text>
-                <View
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    marginTop: 8,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: theme.colors.textSecondary,
-                      fontSize: 16,
-                    }}
-                  >
-                    USD
-                  </Text>
-                  <Text
-                    style={{
-                      color: theme.colors.textPrimary,
-                      fontSize: 17,
-                      fontWeight: '600',
-                      marginLeft: 4,
-                    }}
-                  >
-                    {shortenNumber(averageForPeriod)}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            {filteredExpenses.length > 0 ? (
-              <>
-                <View style={{ marginTop: 16 }}>
-                  {recurrence === Recurrence.Weekly && (
-                    <WeeklyChart expenses={filteredExpenses} />
-                  )}
-                  {recurrence === Recurrence.Monthly && (
-                    <MonthlyChart date={start} expenses={filteredExpenses} />
-                  )}
-                  {recurrence === Recurrence.Yearly && (
-                    <YearlyChart expenses={filteredExpenses} />
-                  )}
-                </View>
-                <View style={{ marginTop: 16 }}>
-                  <ExpensesList groups={groupedExpenses} />
-                </View>
-              </>
-            ) : (
-              <Text
-                style={{
-                  color: theme.colors.textPrimary,
-                  fontSize: 18,
-                  lineHeight: 28,
-                  marginTop: 40,
-                  textAlign: 'center',
-                }}
-              >
-                There are no expenses reported for this period.
-              </Text>
-            )}
-          </View>
-        )}
+        renderItem={({ item }) => <ReportPage {...item} />}
       />
       <BottomSheet
         ref={reportsSheetRef}
@@ -221,7 +139,8 @@ export const Reports = ({ reportsSheetRef }: Props) => {
                 style={{
                   fontSize: 18,
                   textTransform: 'capitalize',
-                  color: recurrence === item ? theme.colors.primary : 'white',
+                  color:
+                    state.recurrence === item ? theme.colors.primary : 'white',
                 }}
               >
                 {item}
