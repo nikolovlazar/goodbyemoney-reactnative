@@ -68,7 +68,6 @@ export const Reports = ({ reportsSheetRef }: Props) => {
   const [state, dispatch] = useReducer(pagerReducer, {
     recurrence: Recurrence.Weekly,
     numberOfPages: 53,
-    page: 0,
   });
 
   const selectRecurrence = (selectedRecurrence: Recurrence) => {

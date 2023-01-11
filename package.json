@@ -14,6 +14,7 @@
     "@react-navigation/native": "^6.0.14",
     "@react-navigation/native-stack": "^6.9.4",
     "@realm/react": "^0.4.1",
+    "@sentry/react-native": "4.13.0",
     "@types/react": "~18.0.24",
     "@types/react-native": "~0.70.6",
     "d3": "^7.7.0",
@@ -32,7 +33,12 @@
     "react-native-screens": "~3.18.0",
     "react-native-svg": "^13.4.0",
     "realm": "^11.3.1",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.3",
+    "sentry-expo": "~6.0.0",
+    "expo-application": "~5.0.1",
+    "expo-constants": "~14.0.2",
+    "expo-device": "~5.0.0",
+    "expo-updates": "~0.15.6"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

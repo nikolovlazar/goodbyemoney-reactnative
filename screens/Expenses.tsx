@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
+import * as Sentry from 'sentry-expo';
 
 import RealmContext from '../realm';
 import { ExpensesList } from '../components/ExpensesList';
@@ -76,6 +77,24 @@ export const Expenses = () => {
           195
         </Text>
       </View>
+      <TouchableOpacity
+        onPress={() => {
+          throw new Error('My first Sentry error!');
+        }}
+      >
+        <Text style={{ color: theme.colors.primary, fontSize: 17 }}>
+          Simulate Crash
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => {
+          Sentry.Native.nativeCrash();
+        }}
+      >
+        <Text style={{ color: theme.colors.primary, fontSize: 17 }}>
+          Simulate Native Crash
+        </Text>
+      </TouchableOpacity>
       <ExpensesList groups={groupedExpenses} />
     </View>
   );
