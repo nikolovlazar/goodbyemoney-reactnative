@@ -4,8 +4,13 @@ import Entypo from '@expo/vector-icons/Entypo';
 
 import { ListItem } from '../components/ListItem';
 import { theme } from '../theme';
+import RealmContext from '../realm';
+
+const { useRealm } = RealmContext;
 
 export const Settings = ({ navigation }) => {
+  const realm = useRealm();
+
   return (
     <View
       style={{
@@ -44,7 +49,11 @@ export const Settings = ({ navigation }) => {
               {
                 text: 'Erase data',
                 style: 'destructive',
-                onPress: () => console.log('Erase data Pressed'),
+                onPress: () => {
+                  realm.write(() => {
+                    realm.deleteAll();
+                  });
+                },
               },
             ],
             {

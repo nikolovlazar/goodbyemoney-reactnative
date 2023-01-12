@@ -94,7 +94,7 @@ export const Expenses = () => {
       </View>
       <BottomSheet
         ref={recurrenceSheetRef}
-        index={1}
+        index={-1}
         handleStyle={{
           backgroundColor: theme.colors.card,
           borderTopLeftRadius: 12,
