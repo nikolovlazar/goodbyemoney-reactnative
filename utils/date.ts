@@ -1,4 +1,4 @@
-import { format, previousMonday, sub, nextSunday } from 'date-fns';
+import { format, add, previousMonday, sub, nextSunday } from 'date-fns';
 
 import { Recurrence } from '../types/recurrence';
 
@@ -21,6 +21,14 @@ export const calculateRange = (period: Recurrence, periodIndex: number) => {
   let end: Date;
 
   switch (period) {
+    case Recurrence.Daily:
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      end = add(start, {
+        hours: 23,
+        minutes: 59,
+        seconds: 59,
+      });
+      break;
     case Recurrence.Weekly:
       const firstDayOfThisWeek = previousMonday(now);
       const daysToSubtract = periodIndex * 7;

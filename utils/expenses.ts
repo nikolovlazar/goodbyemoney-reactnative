@@ -12,6 +12,9 @@ export const filterExpensesInPeriod = (
 ) => {
   const { start, end } = calculateRange(period, periodIndex);
 
+  console.log('start', start);
+  console.log('end', end);
+
   return expenses.filter((expense) => {
     const { date } = expense;
     return date >= start && date <= end;
@@ -20,6 +23,10 @@ export const filterExpensesInPeriod = (
 
 export const groupExpensesByDay = (expenses: Expense[]): ExpensesGroup[] => {
   const groupedExpenses: { [key: string]: Expense[] } = {};
+
+  expenses.sort((a, b) => {
+    return b.date.getTime() - a.date.getTime();
+  });
 
   expenses.forEach((expense) => {
     const { date } = expense;
