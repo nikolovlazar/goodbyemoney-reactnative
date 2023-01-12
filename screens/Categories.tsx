@@ -121,6 +121,7 @@ export const Categories = () => {
           </TouchableOpacity>
           <TextInput
             placeholder='Category name'
+            placeholderTextColor={theme.colors.textSecondary}
             onChange={(event) => setNewName(event.nativeEvent.text)}
             value={newName}
             style={{
