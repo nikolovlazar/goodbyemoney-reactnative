@@ -29,7 +29,7 @@ export const MonthlyChart = ({ expenses, date }: Props) => {
 
   const groupedExpenses = expenses.reduce((acc, expense) => {
     averageExpense += expense.amount;
-    const day = expense.date.getDay();
+    const day = expense.date.getDate();
     const existing = acc.find((e) => e.day === day);
     if (!!existing) {
       existing.total += expense.amount;

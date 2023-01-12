@@ -12,9 +12,6 @@ export const filterExpensesInPeriod = (
 ) => {
   const { start, end } = calculateRange(period, periodIndex);
 
-  console.log('start', start);
-  console.log('end', end);
-
   return expenses.filter((expense) => {
     const { date } = expense;
     return date >= start && date <= end;
