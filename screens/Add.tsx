@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   KeyboardAvoidingView,
   TextInput,
@@ -11,21 +11,21 @@ import {
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 
 import RealmContext from '../realm';
 import { ListItem } from '../components/ListItem';
 import { Recurrence } from '../types/recurrence';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { theme } from '../theme';
 import { Category } from '../models/category';
 import { Expense } from '../models/expense';
 
-const { useQuery, useRealm } = RealmContext;
+const { useRealm } = RealmContext;
 
 export const Add = () => {
   const realm = useRealm();
-  const categories = useQuery(Category);
+  const categories = realm.objects<Category>('Category');
 
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['25%', '50%', '90%'], []);
@@ -39,6 +39,10 @@ export const Add = () => {
   const [note, setNote] = React.useState('');
   const [category, setCategory] = React.useState<Category>(categories[0]);
 
+  const onCategoriesChange = (newCategories) => {
+    setCategory(newCategories[0] ?? []);
+  };
+
   const selectRecurrence = (selectedRecurrence: string) => {
     setRecurrence(selectedRecurrence as Recurrence);
     sheetRef.current?.close();
@@ -49,6 +53,14 @@ export const Add = () => {
     sheetRef.current?.close();
   };
 
+  const clearForm = () => {
+    setAmount('');
+    setRecurrence(Recurrence.None);
+    setDate(new Date());
+    setNote('');
+    setCategory(categories[0]);
+  };
+
   const submitExpense = () => {
     realm.write(() => {
       realm.create(
@@ -56,7 +68,19 @@ export const Add = () => {
         Expense.generate(parseFloat(amount), recurrence, date, note, category)
       );
     });
+
+    clearForm();
   };
+
+  useEffect(() => {
+    if (categories.isValid()) {
+      categories.addListener(onCategoriesChange);
+    }
+
+    return () => {
+      categories.removeListener(onCategoriesChange);
+    };
+  }, []);
 
   return (
     <>
@@ -236,7 +260,7 @@ export const Add = () => {
         )}
         {sheetView === 'category' && (
           <BottomSheetFlatList
-            data={categories}
+            data={categories[0]?.isValid() ? categories : []}
             keyExtractor={({ _id }) => _id.toHexString()}
             renderItem={({ item }) => (
               <TouchableHighlight
