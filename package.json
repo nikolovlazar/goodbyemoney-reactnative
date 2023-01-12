@@ -39,7 +39,8 @@
     "expo-constants": "~14.0.2",
     "expo-device": "~5.0.0",
     "expo-updates": "~0.15.6",
-    "expo-network": "~5.0.0"
+    "expo-network": "~5.0.0",
+    "react-native-get-random-values": "~1.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"
